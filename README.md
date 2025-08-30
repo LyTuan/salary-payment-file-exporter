@@ -217,14 +217,14 @@ This diagram shows the process of the daily batch job (`exporter:run`), which is
 
 ```mermaid
 sequenceDiagram
-    participant Scheduler (e.g., Cron)
-    participant RakeTask (exporter:run)
+    participant "Scheduler (e.g., Cron)"
+    participant "RakeTask (exporter:run)"
     participant PaymentExporter
     participant Database
     participant FileSystem
 
-    Scheduler->>+RakeTask: Executes 'rails exporter:run'
-    RakeTask->>+PaymentExporter: new.export!
+    "Scheduler (e.g., Cron)"->>+"RakeTask (exporter:run)": Executes 'rails exporter:run'
+    "RakeTask (exporter:run)"->>+PaymentExporter: new.export!
     
     PaymentExporter->>+Database: Finds pending payments (WHERE status=0 AND pay_date<=today)
     
@@ -250,10 +250,10 @@ sequenceDiagram
         PaymentExporter->>+FileSystem: Moves file from /exports to /outbox
         FileSystem-->>-PaymentExporter: Success
         
-        Note over RakeTask: Logs success message to console
+        Note over "RakeTask (exporter:run)": Logs success message to console
     else No payments found
         Database-->>-PaymentExporter: Returns empty relation
-        Note over RakeTask: Logs 'No pending payments' and exits
+        Note over "RakeTask (exporter:run)": Logs 'No pending payments' and exits
     end
 ```
 
