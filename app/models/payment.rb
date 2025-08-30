@@ -3,7 +3,7 @@ class Payment < ApplicationRecord
   belongs_to :exported_file, optional: true
 
   # Enum for status: 0 -> pending, 1 -> exported
-  enum status: { pending: 0, exported: 1 }
+  enum :status, { pending: 0, exported: 1 }
 
   # Validations
   validates :employee_id, presence: true
