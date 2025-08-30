@@ -160,7 +160,7 @@ curl -X POST http://localhost:3000/payments \
 
 ### Rake Task: Export Payments
 
-To manually trigger the daily payment export job, run the following Rake task. This will query pending payments and generate a `.txt` file in the `/exports` directory.
+To manually trigger the daily payment export job, run the following Rake task. This will query pending payments and generate a `.txt` file in the `/outbox` directory.
 
 ```sh
 rails exporter:run
