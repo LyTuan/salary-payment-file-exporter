@@ -16,12 +16,22 @@ class PaymentCreator
   def call
     raise CreationError, "Payments data cannot be empty" if @payments_attributes.empty?
 
-    ActiveRecord::Base.transaction do
-      @payments_attributes.map do |payment_attrs|
-        # The create! method will raise ActiveRecord::RecordInvalid on failure,
-        # which will be caught by the controller and trigger a transaction rollback.
-        @company.payments.create!(payment_attrs.to_h)
-      end
+    # For high-performance bulk inserts, `insert_all!` is significantly faster than
+    # creating records one by one, as it performs a single SQL INSERT statement.
+    # Note: `insert_all!` bypasses Active Record callbacks and model validations by default.
+    # We assume data is pre-validated or we rely on database constraints.
+    now = Time.current
+    records_to_insert = @payments_attributes.map do |attrs|
+      attrs.to_h.merge(
+        company_id: @company.id,
+        created_at: now,
+        updated_at: now
+      )
     end
+
+    # This will raise a database-level error (e.g., ActiveRecord::NotNullViolation) on failure.
+    Payment.insert_all!(records_to_insert)
+
+    records_to_insert # Return the array of hashes so the controller can get the count.
   end
 end

@@ -166,7 +166,8 @@ To manually trigger the daily payment export job, run the following Rake task. T
 rails exporter:run
 ```
 
-### API Testing with Postman + A Postman collection is included in this repository to make it easy to test the API endpoints and validation rules.
+### API Testing with Postman 
+A Postman collection is included in this repository to make it easy to test the API endpoints and validation rules.
 
 #### 1.  Locate the Collection File:
 -   The collection is located at /postman/salary-payment-file-exporter.json.
