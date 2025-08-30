@@ -120,7 +120,8 @@ This project uses RSpec for testing.
     bundle exec rspec
     ```
 3. **Result**
-    ![img.png](demo/unit_test_result.png)
+
+![img.png](demo/unit_test_result.png)
 ---
 
 ## ⚡️ Performance Testing
