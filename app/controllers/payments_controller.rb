@@ -6,17 +6,26 @@ class PaymentsController < ApplicationController
       return render json: { error: "Company not found" }, status: :bad_request
     end
 
-    payments = PaymentCreator.call(
+    # 1. Validate all incoming payments before creating any.
+    # This ensures atomicity at the business logic level.
+    payments_attributes = payment_params[:payments] || []
+    payments_to_validate = payments_attributes.map { |attrs| company.payments.build(attrs.to_h) }
+
+    # Find the first invalid payment to return its specific errors.
+    invalid_payment = payments_to_validate.find(&:invalid?)
+    if invalid_payment
+      return render json: { errors: invalid_payment.errors.full_messages }, status: :bad_request
+    end
+
+    # 2. If all are valid, proceed with high-performance bulk creation.
+    created_records = PaymentCreator.call(
       company: company,
-      payments_attributes: payment_params[:payments]
+      payments_attributes: payments_attributes
     )
 
-    render json: { message: "Payments created successfully.", count: payments.size }, status: :created
+    render json: { message: "Payments created successfully.", count: created_records.size }, status: :created
 
-  # Rescue from validation errors to return a 400 Bad Request
-  rescue ActiveRecord::RecordInvalid => e
-    render json: { errors: e.record.errors.full_messages }, status: :bad_request
-  # Rescue from other potential errors, including our custom one
+  # Rescue from service-level or unexpected database errors.
   rescue PaymentCreator::CreationError, StandardError => e
     render json: { error: "An unexpected error occurred: #{e.message}" }, status: :bad_request
   end
