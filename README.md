@@ -194,21 +194,22 @@ sequenceDiagram
     participant PaymentCreator
     participant Database
 
-    Client->>+PaymentsController: POST /payments with JSON payload
-    PaymentsController->>+PaymentCreator: call(company:, payments_attributes:)
-    Note over PaymentCreator: Bypasses all model validations for performance.
-    PaymentCreator->>+Database: INSERT INTO payments (...) [single bulk statement]
+    Client->>PaymentsController: POST /payments with JSON payload
+    PaymentsController->>PaymentCreator: call(company:, payments_attributes:)
+    Note over PaymentCreator: Bypasses all model validations for performance
+    PaymentCreator->>Database: INSERT INTO payments (...) [single bulk statement]
     
     alt Database constraints met
-        Database-->>-PaymentCreator: Success
-        PaymentCreator-->>-PaymentsController: Returns array of attribute hashes
-        PaymentsController-->>-Client: 201 Created with success message
+        Database-->>PaymentCreator: Success
+        PaymentCreator-->>PaymentsController: Returns array of attribute hashes
+        PaymentsController-->>Client: 201 Created with success message
     else Database constraint violated (e.g., NOT NULL)
-        Database-->>-PaymentCreator: Raises DB-level exception (e.g., ActiveRecord::NotNullViolation)
-        PaymentCreator-->>-PaymentsController: Propagates DB exception
+        Database-->>PaymentCreator: Raises DB-level exception (e.g., ActiveRecord::NotNullViolation)
+        PaymentCreator-->>PaymentsController: Propagates DB exception
         Note over PaymentsController: Catches exception via 'rescue StandardError'
-        PaymentsController-->>-Client: 400 Bad Request with error message
+        PaymentsController-->>Client: 400 Bad Request with error message
     end
+
 ```
 
 ### Daily Batch Export Flow
@@ -217,43 +218,42 @@ This diagram shows the process of the daily batch job (`exporter:run`), which is
 
 ```mermaid
 sequenceDiagram
-    participant "Scheduler (e.g., Cron)"
-    participant "RakeTask (exporter:run)"
-    participant PaymentExporter
-    participant Database
-    participant FileSystem
+    participant Scheduler as "Scheduler (e.g., Cron)"
+    participant RakeTask as "RakeTask (exporter:run)"
+    participant Exporter as PaymentExporter
+    participant DB as Database
+    participant FS as FileSystem
 
-    "Scheduler (e.g., Cron)"->>+"RakeTask (exporter:run)": Executes 'rails exporter:run'
-    "RakeTask (exporter:run)"->>+PaymentExporter: new.export!
+    Scheduler->>RakeTask: Executes 'rails exporter:run'
+    RakeTask->>Exporter: new.export!
     
-    PaymentExporter->>+Database: Finds pending payments (WHERE status=0 AND pay_date<=today)
+    Exporter->>DB: Finds pending payments (status=0, pay_date<=today)
     
     alt Payments found
-        Database-->>PaymentExporter: Returns ActiveRecord::Relation
+        DB-->>Exporter: Returns ActiveRecord::Relation
 
-        PaymentExporter->>Database: BEGIN TRANSACTION
-        Note right of PaymentExporter: 1. Creates ExportedFile record
-        PaymentExporter->>Database: INSERT INTO exported_files
+        Exporter->>DB: BEGIN TRANSACTION
+        Note right of Exporter: 1. Creates ExportedFile record
+        Exporter->>DB: INSERT INTO exported_files
         
-        Note right of PaymentExporter: 2. Generates .txt file in memory-efficient batches
+        Note right of Exporter: 2. Generates .txt file in memory-efficient batches
         loop For each batch of 1000 payments
-            PaymentExporter->>Database: SELECT ... FROM payments WHERE ... LIMIT 1000 OFFSET ...
-            Database-->>PaymentExporter: Returns batch of records
+            Exporter->>DB: SELECT ... LIMIT 1000 OFFSET ...
+            DB-->>Exporter: Returns batch of records
         end
-        PaymentExporter->>FileSystem: Writes file to /exports
+        Exporter->>FS: Writes file to /exports
         
-        Note right of PaymentExporter: 3. Updates all found payments in a single query
-        PaymentExporter->>Database: UPDATE payments SET status=1, exported_file_id=...
+        Note right of Exporter: 3. Updates all found payments in a single query
+        Exporter->>DB: UPDATE payments SET status=1, exported_file_id=...
+        DB-->>Exporter: COMMIT TRANSACTION
         
-        Database-->>-PaymentExporter: COMMIT TRANSACTION
+        Exporter->>FS: Moves file from /exports to /outbox
+        FS-->>Exporter: Success
         
-        PaymentExporter->>+FileSystem: Moves file from /exports to /outbox
-        FileSystem-->>-PaymentExporter: Success
-        
-        Note over "RakeTask (exporter:run)": Logs success message to console
+        Note over RakeTask: Logs success message to console
     else No payments found
-        Database-->>-PaymentExporter: Returns empty relation
-        Note over "RakeTask (exporter:run)": Logs 'No pending payments' and exits
+        DB-->>Exporter: Returns empty relation
+        Note over RakeTask: Logs 'No pending payments' and exits
     end
 ```
 
