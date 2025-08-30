@@ -227,12 +227,13 @@ sequenceDiagram
     RakeTask->>+PaymentExporter: new.export!
     
     PaymentExporter->>+Database: Finds pending payments (WHERE status=0 AND pay_date<=today)
-    Database-->>-PaymentExporter: Returns ActiveRecord::Relation
     
     alt Payments found
-        PaymentExporter->>+Database: BEGIN TRANSACTION
+        Database-->>PaymentExporter: Returns ActiveRecord::Relation
+
+        PaymentExporter->>Database: BEGIN TRANSACTION
         Note right of PaymentExporter: 1. Creates ExportedFile record
-        PaymentExporter->>+Database: INSERT INTO exported_files
+        PaymentExporter->>Database: INSERT INTO exported_files
         
         Note right of PaymentExporter: 2. Generates .txt file in memory-efficient batches
         loop For each batch of 1000 payments
@@ -251,6 +252,7 @@ sequenceDiagram
         
         Note over RakeTask: Logs success message to console
     else No payments found
+        Database-->>-PaymentExporter: Returns empty relation
         Note over RakeTask: Logs 'No pending payments' and exits
     end
 ```
