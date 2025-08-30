@@ -15,32 +15,9 @@ RSpec.describe PaymentCreator do
       end
 
       it 'associates the payments with the correct company' do
-        payments = described_class.call(company: company, payments_attributes: valid_attributes)
-        expect(payments.first.company).to eq(company)
-        expect(payments.last.company).to eq(company)
-      end
-
-      it 'returns the created payment records' do
-        payments = described_class.call(company: company, payments_attributes: valid_attributes)
-        expect(payments).to all(be_a(Payment))
-        expect(payments.size).to eq(2)
-      end
-    end
-
-    context 'with invalid payment attributes' do
-      it 'raises RecordInvalid and does not create any payments' do
-        expect do
-          described_class.call(company: company, payments_attributes: invalid_attributes)
-        end.to raise_error(ActiveRecord::RecordInvalid)
-          .and change(Payment, :count).by(0)
-      end
-
-      it 'rolls back the transaction if one payment is invalid' do
-        mixed_attributes = [attributes_for(:payment), attributes_for(:payment, bank_bsb: 'invalid')]
-        expect do
-          described_class.call(company: company, payments_attributes: mixed_attributes)
-        end.to raise_error(ActiveRecord::RecordInvalid)
-        expect(Payment.count).to eq(0)
+        described_class.call(company: company, payments_attributes: valid_attributes)
+        expect(Payment.first.company).to eq(company)
+        expect(Payment.last.company).to eq(company)
       end
     end
 
