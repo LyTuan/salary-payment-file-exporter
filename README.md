@@ -14,6 +14,33 @@ This is a Ruby on Rails API application designed to accept salary payment inform
 
 ---
 
+## 🏛️ Project Structure
+
+The project follows standard Ruby on Rails conventions, with a few key directories for our specific logic:
+
+*   **/app/controllers**: Handles incoming HTTP requests.
+    *   `payments_controller.rb`: Manages the creation of new payments via the API.
+*   **/app/models**: Contains the application's data models and their validations.
+    *   `payment.rb`: The core model for a single payment record.
+    *   `company.rb`: Represents a company making payments.
+    *   `exported_file.rb`: Tracks the batch export files.
+*   **/app/services**: Encapsulates specific business logic into plain Ruby objects.
+    *   `payment_creator.rb`: Handles the logic for creating a batch of payments.
+    *   `payment_exporter.rb`: Contains the logic for querying pending payments and generating the export file.
+*   **/config**: Application configuration.
+    *   `routes.rb`: Defines the API endpoints.
+*   **/db**: Contains database schema, migrations, and seed data.
+*   **/lib/tasks**: Custom Rake tasks.
+    *   `exporter.rake`: The task to trigger the daily payment export.
+*   **/spec**: All tests for the application.
+    *   `/factories`: Blueprints for creating test data with FactoryBot.
+    *   `/models`: Unit tests for models.
+    *   `/requests`: Integration tests for the API endpoints.
+    *   `/services`: Unit tests for the service objects.
+*   **docker-compose.yml**: Defines the PostgreSQL database service for a consistent development environment.
+
+---
+
 ## ⚙️ Prerequisites
 
 Before you begin, ensure you have the following installed on your system:
