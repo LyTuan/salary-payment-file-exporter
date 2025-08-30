@@ -122,6 +122,141 @@ This project uses RSpec for testing.
 
 ---
 
+## ⚡️ Performance Testing
+
+To ensure the application can handle a large volume of data, especially for the daily export job, performance testing tasks are included.
+
+### 1. Seed Performance Data
+
+First, populate the database with a large number of pending payments using the provided Rake task. You can specify the number of records to create using the `COUNT` environment variable.
+
+```sh
+# Example: Seed the database with 1,000,000 payment records
+rails performance:seed COUNT=1000000
+```
+
+### 2. Run the Exporter Performance Test
+
+Once the database is seeded, you can measure the performance of the export job. The `time` command will show the total execution time.
+
+```sh
+time bundle exec rails exporter:run
+```
+
+Monitor the memory and CPU usage of the process while it runs to identify potential bottlenecks.
+
+### 3. Database Indexing for Performance
+
+When working with large datasets, database indexes are critical for query performance. The `PaymentExporter` service relies on an efficient query to find pending payments.
+
+To optimize this, we should add a composite index on the `status` and `pay_date` columns of the `payments` table.
+
+**1. Generate the Migration:**
+
+```sh
+rails g migration AddIndexForExporterToPayments
+```
+
+**2. Edit the Migration File:**
+
+Open the newly created migration file in `db/migrate/` and add the following code. Using the `concurrently` algorithm is essential for applying indexes to large tables in production without causing downtime.
+
+```ruby
+class AddIndexForExporterToPayments < ActiveRecord::Migration[8.0]
+  disable_ddl_transaction!
+
+  def change
+    add_index :payments, [:status, :pay_date], algorithm: :concurrently
+  end
+end
+```
+
+**3. Apply the Migration:**
+
+```sh
+rails db:migrate
+```
+
+---
+
+## 🌊 Workflows
+
+Visual diagrams of the application's main processes, created with Mermaid.
+
+### API Payment Creation Flow
+
+This diagram illustrates the sequence of events when a client submits new payments to the `POST /payments` endpoint. It highlights the high-performance bulk-insert strategy which bypasses model validations in favor of speed, relying on database-level constraints for integrity.
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant PaymentsController
+    participant PaymentCreator
+    participant Database
+
+    Client->>+PaymentsController: POST /payments with JSON payload
+    PaymentsController->>+PaymentCreator: call(company:, payments_attributes:)
+    Note over PaymentCreator: Bypasses all model validations for performance.
+    PaymentCreator->>+Database: INSERT INTO payments (...) [single bulk statement]
+    
+    alt Database constraints met
+        Database-->>-PaymentCreator: Success
+        PaymentCreator-->>-PaymentsController: Returns array of attribute hashes
+        PaymentsController-->>-Client: 201 Created with success message
+    else Database constraint violated (e.g., NOT NULL)
+        Database-->>-PaymentCreator: Raises DB-level exception (e.g., ActiveRecord::NotNullViolation)
+        PaymentCreator-->>-PaymentsController: Propagates DB exception
+        Note over PaymentsController: Catches exception via 'rescue StandardError'
+        PaymentsController-->>-Client: 400 Bad Request with error message
+    end
+```
+
+### Daily Batch Export Flow
+
+This diagram shows the process of the daily batch job (`exporter:run`), which is responsible for generating the payment file. The process is designed to be memory-efficient and transactional.
+
+```mermaid
+sequenceDiagram
+    participant Scheduler (e.g., Cron)
+    participant RakeTask (exporter:run)
+    participant PaymentExporter
+    participant Database
+    participant FileSystem
+
+    Scheduler->>+RakeTask: Executes 'rails exporter:run'
+    RakeTask->>+PaymentExporter: new.export!
+    
+    PaymentExporter->>+Database: Finds pending payments (WHERE status=0 AND pay_date<=today)
+    Database-->>-PaymentExporter: Returns ActiveRecord::Relation
+    
+    alt Payments found
+        PaymentExporter->>+Database: BEGIN TRANSACTION
+        Note right of PaymentExporter: 1. Creates ExportedFile record
+        PaymentExporter->>+Database: INSERT INTO exported_files
+        
+        Note right of PaymentExporter: 2. Generates .txt file in memory-efficient batches
+        loop For each batch of 1000 payments
+            PaymentExporter->>Database: SELECT ... FROM payments WHERE ... LIMIT 1000 OFFSET ...
+            Database-->>PaymentExporter: Returns batch of records
+        end
+        PaymentExporter->>FileSystem: Writes file to /exports
+        
+        Note right of PaymentExporter: 3. Updates all found payments in a single query
+        PaymentExporter->>Database: UPDATE payments SET status=1, exported_file_id=...
+        
+        Database-->>-PaymentExporter: COMMIT TRANSACTION
+        
+        PaymentExporter->>+FileSystem: Moves file from /exports to /outbox
+        FileSystem-->>-PaymentExporter: Success
+        
+        Note over RakeTask: Logs success message to console
+    else No payments found
+        Note over RakeTask: Logs 'No pending payments' and exits
+    end
+```
+
+---
+
 ## 🛠️ Usage
 
 ### API Endpoint: Create Payments
@@ -166,7 +301,7 @@ To manually trigger the daily payment export job, run the following Rake task. T
 rails exporter:run
 ```
 
-### API Testing with Postman 
+### ![](https://img.shields.io/badge/Run%20in%20Postman-orange?logo=postman) Testing with Postman 
 A Postman collection is included in this repository to make it easy to test the API endpoints and validation rules.
 
 #### 1.  Locate the Collection File:

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_30_072935) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_30_091147) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -41,6 +41,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_30_072935) do
     t.datetime "updated_at", null: false
     t.index ["company_id"], name: "index_payments_on_company_id"
     t.index ["exported_file_id"], name: "index_payments_on_exported_file_id"
+    t.index ["status", "pay_date"], name: "index_payments_on_status_and_pay_date"
     t.index ["status"], name: "index_payments_on_status"
   end
 
