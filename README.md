@@ -165,3 +165,20 @@ To manually trigger the daily payment export job, run the following Rake task. T
 ```sh
 rails exporter:run
 ```
+
+### API Testing with Postman + A Postman collection is included in this repository to make it easy to test the API endpoints and validation rules.
+
+#### 1.  Locate the Collection File:
+-   The collection is located at /postman/salary-payment-file-exporter.json.
+
+#### 2.  Import into Postman:
+- Open the Postman desktop application.
+- Click the Import button in the top-left corner.••Drag and drop the salary-payment-file-exporter.json file into the import window.
+- Drag and drop the salary-payment-file-exporter.json file into the import window
+
+#### 3.Run the Collection:
+- The collection uses a variable {{baseUrl}} which defaults to http://localhost:3000. Ensure your Rails server is running.••Click the three dots (...) next to the imported collection name ("Salary Payment API") and select Run collection.••Click the Run Salary Payment API button to execute all predefined tests, including success cases and specific validation failures.
+- Click the three dots (...) next to the imported collection name ("Salary Payment API") and select Run collection.
+- Click the Run Salary Payment API button to execute all predefined tests, including success cases and specific validation failures.
+#### 4. Result
+![img.png](demo/img.png)
