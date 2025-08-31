@@ -8,4 +8,8 @@
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
 
-Company.find_or_create_by!(name: 'Default Company')
+company = Company.find_or_create_by!(name: 'Default Company')
+
+puts "Seed data created."
+puts "Default Company API Key: #{company.api_key}"
+puts "Use this key in the 'Authorization: Bearer <key>' header for API requests."

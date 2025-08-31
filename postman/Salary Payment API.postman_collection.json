@@ -1,0 +1,377 @@
+{
+	"info": {
+		"_postman_id": "f2e0b03f-0c70-4409-b92a-0c483d67a510",
+		"name": "Salary Payment API",
+		"description": "A collection to test the validation rules for the Salary Payment File Exporter API.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "932178"
+	},
+	"item": [
+		{
+			"name": "Success Case",
+			"item": [
+				{
+					"name": "[Success] Create Payments with Valid Data",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 Created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response body is correct\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.eql(\"Payments created successfully.\");",
+									"    pm.expect(jsonData.count).to.eql(1);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"company_id\": \"1\",\n    \"payments\": [\n        {\n            \"employee_id\": \"E-{{$randomInt}}\",\n            \"bank_bsb\": \"062000\",\n            \"bank_account\": \"12345678\",\n            \"amount_cents\": 250000,\n            \"currency\": \"AUD\",\n            \"pay_date\": \"{{$isoTimestamp}}\"\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"payments"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Validation Failures",
+			"item": [
+				{
+					"name": "[Validation] Fails when amount_cents is zero",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Response contains correct validation error message\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.errors.payments[0].amount_cents[0]).to.eql(\"must be greater than 0\");",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n   \"company_id\":\"abc\",\n    \"payments\": [\n        {\n            \"employee_id\": \"E-{{$randomInt}}\",\n            \"bank_bsb\": \"062000\",\n            \"bank_account\": \"12345678\",\n            \"amount_cents\": 0,\n            \"currency\": \"AUD\",\n            \"pay_date\": \"{{$isoTimestamp}}\"\n        }\n    ]\n\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"payments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[Validation] Fails when BSB is too short",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Response contains correct validation error message\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.errors.payments[0].bank_bsb[0]).to.eql(\"is in invalid format\");",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"company_id\":\"abc\",\n    \"payments\": [\n        {\n            \"employee_id\": \"E-{{$randomInt}}\",\n            \"bank_bsb\": \"06200\",\n            \"bank_account\": \"12345678\",\n            \"amount_cents\": 50000,\n            \"currency\": \"AUD\",\n            \"pay_date\": \"{{$isoTimestamp}}\"\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"payments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[Validation] Fails when Account Number is too long",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Response contains correct validation error message\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.errors.payments[0].bank_account[0]).to.eql(\"is in invalid format\");",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"company_id\": \"abc\",\n    \"payments\": [\n        {\n            \"employee_id\": \"E-{{$randomInt}}\",\n            \"bank_bsb\": \"062000\",\n            \"bank_account\": \"1234567890\",\n            \"amount_cents\": 50000,\n            \"currency\": \"AUD\",\n            \"pay_date\": \"{{$isoTimestamp}}\"\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"payments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[Validation] Fails when Currency is not AUD",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Response contains correct validation error message\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.errors.payments[0].currency[0]).to.eql(\"must be one of: AUD\");",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"payments\": [\n        {\n            \"employee_id\": \"E-{{$randomInt}}\",\n            \"bank_bsb\": \"062000\",\n            \"bank_account\": \"12345678\",\n            \"amount_cents\": 50000,\n            \"currency\": \"USD\",\n            \"pay_date\": \"{{$isoTimestamp}}\"\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"payments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[Validation] Fails when Pay Date is in the past",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// This script requires Moment.js, which is available in the Postman sandbox.",
+									"const moment = require('moment');",
+									"",
+									"// Get yesterday's date in YYYY-MM-DD format",
+									"const yesterday = moment().subtract(1, 'days').format('YYYY-MM-DD');",
+									"",
+									"// Set it as a collection variable to use in the request body",
+									"pm.collectionVariables.set(\"yesterday_date\", yesterday);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Response contains correct validation error message\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.errors.payments[0].pay_date[0]).to.eql(\"can't be in the past\");",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"payments\": [\n        {\n            \"employee_id\": \"E-{{$randomInt}}\",\n            \"bank_bsb\": \"062000\",\n            \"bank_account\": \"12345678\",\n            \"amount_cents\": 50000,\n            \"currency\": \"AUD\",\n            \"pay_date\": \"{{yesterday_date}}\"\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"payments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[Auth] Fails when token is invalid",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401 Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"pm.test(\"Response contains correct error message\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.error).to.eql(\"Authorization token is missing or invalid\");",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"payments\": []\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"payments"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "HELLO123",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000"
+		},
+		{
+			"key": "yesterday_date",
+			"value": ""
+		}
+	]
+}
