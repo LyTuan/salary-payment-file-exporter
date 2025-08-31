@@ -20,6 +20,12 @@ gem 'tzinfo-data', platforms: %i[windows jruby]
 # Reduces boot times through caching; required in config/boot.rb
 gem 'bootsnap', require: false
 
+# The 'csv' library will become a default gem in Ruby 3.4 and needs to be explicit.
+gem 'csv'
+
+# Explicitly require a secure version of rexml to override the vulnerable default gem.
+gem 'rexml', '>= 3.3.9'
+
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
 # gem "image_processing", "~> 1.2"
 
@@ -44,5 +50,5 @@ group :development, :test do
   gem 'dry-types'
   gem 'dry-validation'
 
-  gem "rspec_junit_formatter"
+  gem 'rspec_junit_formatter'
 end
