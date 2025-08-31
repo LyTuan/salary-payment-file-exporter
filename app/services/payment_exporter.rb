@@ -5,8 +5,13 @@ require 'fileutils'
 
 # This should be in app/services/
 class PaymentExporter
-  EXPORT_PATH = Rails.root.join(Rails.application.credentials.export_path)
-  OUTBOX_PATH = Rails.root.join(Rails.application.credentials.outbox_path)
+  EXPORT_PATH = Rails.root.join(
+    ENV.fetch("EXPORT_PATH", Rails.application.credentials.dig(:export_path) || "exports")
+  )
+
+  OUTBOX_PATH = Rails.root.join(
+    ENV.fetch("OUTBOX_PATH", Rails.application.credentials.dig(:outbox_path) || "outbox")
+  )
 
   def export!
     # Find payments that are pending and due today or earlier
