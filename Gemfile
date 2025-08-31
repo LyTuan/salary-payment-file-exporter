@@ -43,4 +43,6 @@ group :development, :test do
   gem 'dry-struct'
   gem 'dry-types'
   gem 'dry-validation'
+
+  gem "rspec_junit_formatter"
 end
