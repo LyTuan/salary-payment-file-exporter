@@ -32,7 +32,6 @@
 /config/master.key
 
 .idea
-.github
 bin
 log
 tmp
