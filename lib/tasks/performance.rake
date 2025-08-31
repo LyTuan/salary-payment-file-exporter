@@ -21,7 +21,7 @@ namespace :performance do
           bank_account: rand(100_000..999_999_999).to_s,
           amount_cents: rand(1000..100_000),
           currency: 'AUD',
-          pay_date: Date.today - rand(0..5).days,
+          pay_date: Time.zone.today - rand(0..5).days,
           status: 0, # pending
           created_at: now,
           updated_at: now

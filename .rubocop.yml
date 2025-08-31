@@ -1,0 +1,28 @@
+# .rubocop.yml
+
+# Require the extension gems to make their cops available.
+# This is the modern replacement for `inherit_gem` for this use case.
+require:
+  - rubocop-rails
+  - rubocop-performance
+
+AllCops:
+  # This is the key setting to automatically enable new cops as they are
+  # added to RuboCop, which resolves the warning you are seeing.
+  NewCops: enable
+  SuggestExtensions: false
+  Exclude:
+    - 'db/schema.rb'
+    - 'db/migrate/*'
+    - 'bin/*'
+    - 'config/**/*'
+    - 'config.ru'
+    - 'vendor/**/*'
+    - 'tmp/**/*'
+    - 'node_modules/**/*'
+    - '.github/**/*' # Exclude CI files
+
+# The following is a key setting from the omakase gem to ensure
+# that Rails-specific cops are run.
+Rails:
+  Enabled: true

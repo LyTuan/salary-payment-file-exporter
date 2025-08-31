@@ -25,7 +25,7 @@ RSpec.describe 'Payments API', type: :request do
         expect(response).to have_http_status(:created)
 
         # Also test the response body for a more complete test
-        json_response = JSON.parse(response.body)
+        json_response = response.parsed_body
         expect(json_response['message']).to eq('Payments created successfully.')
         expect(json_response['count']).to eq(1)
       end
@@ -37,7 +37,7 @@ RSpec.describe 'Payments API', type: :request do
         invalid_attributes = attributes_for(:payment).merge(overrides)
         payload = { company_id: company.id.to_s, payments: [invalid_attributes] }
         post '/payments', params: payload.to_json, headers: headers
-        JSON.parse(response.body)
+        response.parsed_body
       end
 
       it 'returns a 400 when amount_cents is not positive' do
@@ -60,7 +60,7 @@ RSpec.describe 'Payments API', type: :request do
 
       it 'returns a 400 when company_id is missing' do
         post '/payments', params: { payments: [] }.to_json, headers: headers
-        json_response = JSON.parse(response.body)
+        json_response = response.parsed_body
         expect(response).to have_http_status(:bad_request)
         expect(json_response['errors']['company_id']).to include('is missing')
       end
