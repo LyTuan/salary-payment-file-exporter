@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class AuthenticationMiddleware
   def initialize(app)
     @app = app
@@ -11,7 +13,8 @@ class AuthenticationMiddleware
 
     auth_header = request.get_header('HTTP_AUTHORIZATION')
     unless auth_header&.start_with?('Bearer ')
-      return [401, { 'Content-Type' => 'application/json' }, [{ error: 'Authorization token is missing or invalid' }.to_json]]
+      return [401, { 'Content-Type' => 'application/json' },
+              [{ error: 'Authorization token is missing or invalid' }.to_json]]
     end
 
     token = auth_header.split(' ').last

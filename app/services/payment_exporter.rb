@@ -1,15 +1,18 @@
+# frozen_string_literal: true
+
 require 'csv'
 require 'fileutils'
 
-class PaymentExporter # This should be in app/services/
+# This should be in app/services/
+class PaymentExporter
   EXPORT_PATH = Rails.root.join(Rails.application.credentials.export_path)
   OUTBOX_PATH = Rails.root.join(Rails.application.credentials.outbox_path)
 
   def export!
     # Find payments that are pending and due today or earlier
-    payments_to_export = Payment.pending.where("pay_date <= ?", Date.today)
+    payments_to_export = Payment.pending.where('pay_date <= ?', Date.today)
 
-    return puts "No pending payments to export." if payments_to_export.none?
+    return puts 'No pending payments to export.' if payments_to_export.none?
 
     # Ensure the export directory exists
     FileUtils.mkdir_p(EXPORT_PATH)
@@ -34,7 +37,6 @@ class PaymentExporter # This should be in app/services/
         status: Payment.statuses[:exported],
         exported_file_id: exported_file_record.id
       )
-
     end
 
     # Move file after the transaction is successfully committed
@@ -45,7 +47,7 @@ class PaymentExporter # This should be in app/services/
   private
 
   def generate_file(filepath, payments)
-    CSV.open(filepath, "w") do |csv|
+    CSV.open(filepath, 'w') do |csv|
       # Add headers (optional, but good practice)
       csv << %w[COMPANY_ID EMPLOYEE_ID BSB ACCOUNT AMOUNT_CENTS CURRENCY PAY_DATE]
       # Use find_each to process records in memory-efficient batches
@@ -56,7 +58,6 @@ class PaymentExporter # This should be in app/services/
   end
 
   # ... inside PaymentExporter class ...
-  private
 
   def simulate_sftp_upload(filepath)
     FileUtils.mkdir_p(OUTBOX_PATH)

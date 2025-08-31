@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # This file should ensure the existence of records required to run the application in every environment (production,
 # development, test). The code here should be idempotent so that it can be executed at any point in every environment.
 # The data can then be loaded with the bin/rails db:seed command (or created alongside the database with db:setup).
@@ -10,6 +12,6 @@
 
 company = Company.find_or_create_by!(name: 'Default Company')
 
-puts "Seed data created."
+puts 'Seed data created.'
 puts "Default Company API Key: #{company.api_key}"
 puts "Use this key in the 'Authorization: Bearer <key>' header for API requests."

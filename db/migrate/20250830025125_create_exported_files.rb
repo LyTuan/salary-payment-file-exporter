@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateExportedFiles < ActiveRecord::Migration[8.0]
   def change
     create_table :exported_files do |t|

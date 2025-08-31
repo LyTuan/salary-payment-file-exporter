@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class PaymentsController < ApplicationController
   # POST /payments
   def create
@@ -8,15 +10,13 @@ class PaymentsController < ApplicationController
     contract = ::Payments::CreateContract.new
     validation_result = contract.call(params.to_unsafe_h)
 
-    if validation_result.failure?
-      return render json: { errors: validation_result.errors.to_h }, status: :bad_request
-    end
+    return render json: { errors: validation_result.errors.to_h }, status: :bad_request if validation_result.failure?
 
     validated_data = validation_result.to_h
 
     # Security Check: Ensure the company_id in the payload matches the authenticated company
     if authenticated_company.id.to_s != validated_data[:company_id]
-      return render json: { error: "Payload company_id does not match authenticated company" }, status: :forbidden
+      return render json: { error: 'Payload company_id does not match authenticated company' }, status: :forbidden
     end
 
     # If validation passes, proceed with the service object
@@ -25,7 +25,7 @@ class PaymentsController < ApplicationController
       payments_attributes: validated_data[:payments]
     )
 
-    render json: { message: "Payments created successfully.", count: created_records.size }, status: :created
+    render json: { message: 'Payments created successfully.', count: created_records.size }, status: :created
 
   # Rescue from service-level or unexpected errors.
   rescue PaymentCreator::CreationError => e
