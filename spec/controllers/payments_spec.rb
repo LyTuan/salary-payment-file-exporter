@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# spec/requests/payments_spec.rb
+# spec/controllers/payments_spec.rb
 require 'rails_helper'
 
 RSpec.describe 'Payments API', type: :request do
