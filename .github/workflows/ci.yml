@@ -59,4 +59,7 @@ jobs:
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
 
+      - name: Linting with RuboCop
+        run: bundle exec rubocop
+
 
