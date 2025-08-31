@@ -27,8 +27,11 @@ module SalaryPaymentFileExporter
     # Initialize configuration defaults for originally generated Rails version.
 
     # Add custom middleware and contracts to the autoload paths
-    config.autoload_paths << Rails.root.join('app/middleware')
-    config.autoload_paths << Rails.root.join('app/contracts')
+    # config.autoload_paths << Rails.root.join('app/middleware')
+    # config.autoload_paths << Rails.root.join('app/contracts')
+    config.paths.add "app/middleware", eager_load: true
+    config.paths.add "app/contracts", eager_load: true
+
     # config.eager_load_paths << Rails.root.join("app/middleware")
     # config.eager_load_paths << Rails.root.join("app/contracts")
     require Rails.root.join("app/middleware/authentication_middleware")
