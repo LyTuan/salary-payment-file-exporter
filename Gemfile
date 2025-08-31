@@ -43,7 +43,7 @@ group :development, :test do
   gem 'rubocop-rails-omakase', require: false
 
   gem 'factory_bot_rails'
-  gem 'rspec-rails', '~> 6.0.0'
+  gem 'rspec-rails', '~> 8.0.2'
   gem 'shoulda-matchers'
 
   gem 'dry-struct'
