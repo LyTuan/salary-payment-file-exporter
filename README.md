@@ -142,6 +142,16 @@ To apply the code following rubocop detection, run the following command:
 ```sh
 bundle exec rubocop -A 
 ```
+---
+## 🛡️ Security Scanning
+
+This project uses [Trivy](https://github.com/aquasecurity/trivy) for security scanning, integrated directly into the GitHub Actions CI pipeline.
+
+### Automated Scans
+
+A Trivy scan is automatically performed on every pull request against the `main` branch. The scan checks for known vulnerabilities in both the operating system packages and the application's library dependencies (gems).
+
+The CI build will fail if any vulnerabilities with a `HIGH` or `CRITICAL` severity are detected, ensuring that security issues are addressed before they are merged into the main codebase.
 
 ---
 ## ⚡️ Performance Testing
@@ -337,7 +347,7 @@ curl -X POST http://localhost:3000/payments \
   }
 }'
 ```
-
+---
 ### Rake Task: Export Payments
 
 To manually trigger the daily payment export job, run the following Rake task. This will query pending payments and generate a `.txt` file in the `/outbox` directory.
@@ -354,7 +364,7 @@ Then add bellow command to file and change /path/to/folder to relative path of y
 ```sh 
 00 17 * * * /bin/bash -l -c 'cd path/to/folder && rbenv exec bundle exec rails exporter:run >> log/cron.log 2>&1'
 ```
-
+---
 ### ![](https://img.shields.io/badge/Run%20in%20Postman-orange?logo=postman) Testing with Postman 
 A Postman collection is included in this repository to make it easy to test the API endpoints and validation rules.
 

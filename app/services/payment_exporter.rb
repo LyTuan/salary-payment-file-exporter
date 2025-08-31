@@ -6,11 +6,11 @@ require 'fileutils'
 # This should be in app/services/
 class PaymentExporter
   EXPORT_PATH = Rails.root.join(
-    ENV.fetch("EXPORT_PATH", Rails.application.credentials.dig(:export_path).presence || "exports")
+    ENV.fetch('EXPORT_PATH', Rails.application.credentials[:export_path].presence || 'exports')
   )
 
   OUTBOX_PATH = Rails.root.join(
-    ENV.fetch("OUTBOX_PATH", Rails.application.credentials.dig(:outbox_path).presence || "outbox")
+    ENV.fetch('OUTBOX_PATH', Rails.application.credentials[:outbox_path].presence || 'outbox')
   )
 
   def export!
