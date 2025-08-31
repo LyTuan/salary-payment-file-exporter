@@ -198,37 +198,37 @@ sequenceDiagram
     participant PaymentCreator
     participant Database
 
-    Client->>+AuthMiddleware: POST /payments with Bearer Token & JSON
+    Client->>AuthMiddleware: POST /payments with Bearer Token & JSON
     AuthMiddleware->>Database: Find company by api_key
     
     alt Invalid Token
         Database-->>AuthMiddleware: Company not found
-        AuthMiddleware-->>-Client: 401 Unauthorized
+        AuthMiddleware-->>Client: 401 Unauthorized
     else Valid Token
         Database-->>AuthMiddleware: Returns company
         Note right of AuthMiddleware: Adds company to request env
-        AuthMiddleware->>+PaymentsController: Forwards request
+        AuthMiddleware->>PaymentsController: Forwards request
         
-        PaymentsController->>+CreateContract: call(payload)
+        PaymentsController->>CreateContract: call(payload)
         CreateContract->>Database: Check if company_id exists
         Database-->>CreateContract: Returns true/false
         
         alt Payload Invalid
             CreateContract-->>-PaymentsController: Returns validation failure
-            PaymentsController-->>-Client: 400 Bad Request with errors
+            PaymentsController-->>Client: 400 Bad Request with errors
         else Payload Valid
-            CreateContract-->>-PaymentsController: Returns validated data
+            CreateContract-->>PaymentsController: Returns validated data
             
             Note over PaymentsController: Security Check: payload company_id == authenticated company_id?
             
             alt Mismatched Company ID
-                PaymentsController-->>-Client: 403 Forbidden
+                PaymentsController-->>Client: 403 Forbidden
             else Matched Company ID
-                PaymentsController->>+PaymentCreator: call(company:, payments_attributes:)
+                PaymentsController->>PaymentCreator: call(company:, payments_attributes:)
                 PaymentCreator->>Database: INSERT INTO payments (...) [bulk insert]
                 Database-->>PaymentCreator: Success
-                PaymentCreator-->>-PaymentsController: Returns created records
-                PaymentsController-->>-Client: 201 Created
+                PaymentCreator-->>PaymentsController: Returns created records
+                PaymentsController-->>Client: 201 Created
             end
         end
     end
