@@ -33,13 +33,19 @@ jobs:
       - name: Set up Ruby and install gems
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version-file: '.ruby-version'
+          ruby-version: '3.3.4'
           bundler-cache: true # This will run `bundle install` and cache gems
 
       - name: Set up Test Database
         run: |
-          bundle exec rails db:create
-          bundle exec rails db:migrate
+          bundle exec rake db:create
+          bundle exec rake db:migrate 
 
       - name: Run RSpec tests
-        run: bundle exec rspec
+        run: bundle exec rspec --format RspecJunitFormatter --out tmp/rspec.xml --format progress
+
+      - name: Upload test report
+        uses: actions/upload-artifact@v4
+        with:
+          name: rspec-report
+          path: tmp/rspec.xml
