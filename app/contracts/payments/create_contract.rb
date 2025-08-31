@@ -16,7 +16,7 @@ module Payments
     end
 
     rule(:payments).each do |index:|
-      if value[:pay_date] && value[:pay_date] < Date.today
+      if value[:pay_date] && value[:pay_date] < Time.zone.today
         key([:payments, index,
              :pay_date]).failure("can't be in the past")
       end

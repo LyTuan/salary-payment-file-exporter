@@ -15,14 +15,14 @@ class PaymentExporter
 
   def export!
     # Find payments that are pending and due today or earlier
-    payments_to_export = Payment.pending.where('pay_date <= ?', Date.today)
+    payments_to_export = Payment.pending.where(pay_date: ..Time.zone.today)
 
-    return puts 'No pending payments to export.' if payments_to_export.none?
+    return Rails.logger.debug 'No pending payments to export.' if payments_to_export.none?
 
     # Ensure the export directory exists
     FileUtils.mkdir_p(EXPORT_PATH)
 
-    filename = "#{Date.today.strftime('%Y%m%d')}_payments.txt"
+    filename = "#{Time.zone.today.strftime('%Y%m%d')}_payments.txt"
     filepath = EXPORT_PATH.join(filename)
 
     exported_file_record = nil
@@ -46,7 +46,7 @@ class PaymentExporter
 
     # Move file after the transaction is successfully committed
     simulate_sftp_upload(filepath)
-    puts "Successfully exported #{payments_to_export.count} payments and moved to outbox."
+    Rails.logger.debug { "Successfully exported #{payments_to_export.count} payments and moved to outbox." }
   end
 
   private
@@ -67,6 +67,6 @@ class PaymentExporter
   def simulate_sftp_upload(filepath)
     FileUtils.mkdir_p(OUTBOX_PATH)
     FileUtils.mv(filepath, OUTBOX_PATH)
-    puts "Simulated SFTP upload: Moved #{File.basename(filepath)} to #{OUTBOX_PATH}"
+    Rails.logger.debug { "Simulated SFTP upload: Moved #{File.basename(filepath)} to #{OUTBOX_PATH}" }
   end
 end

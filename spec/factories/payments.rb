@@ -8,7 +8,7 @@ FactoryBot.define do
     bank_account { '12345678' }
     amount_cents { 50_000 }
     currency { 'AUD' }
-    pay_date { Date.today }
+    pay_date { Time.zone.today }
     status { :pending }
   end
 end

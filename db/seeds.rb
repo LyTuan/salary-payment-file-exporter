@@ -12,6 +12,6 @@
 
 company = Company.find_or_create_by!(name: 'Default Company')
 
-puts 'Seed data created.'
-puts "Default Company API Key: #{company.api_key}"
-puts "Use this key in the 'Authorization: Bearer <key>' header for API requests."
+Rails.logger.debug 'Seed data created.'
+Rails.logger.debug { "Default Company API Key: #{company.api_key}" }
+Rails.logger.debug "Use this key in the 'Authorization: Bearer <key>' header for API requests."

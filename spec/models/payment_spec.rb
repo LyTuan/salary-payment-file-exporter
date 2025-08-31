@@ -46,7 +46,7 @@ RSpec.describe Payment, type: :model do
     end
 
     context 'when pay_date is today' do
-      subject(:payment) { build(:payment, pay_date: Date.today) }
+      subject(:payment) { build(:payment, pay_date: Time.zone.today) }
       it { should be_valid }
     end
   end

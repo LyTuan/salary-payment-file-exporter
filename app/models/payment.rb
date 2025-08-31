@@ -19,6 +19,6 @@ class Payment < ApplicationRecord
   validate :pay_date_cannot_be_in_the_past
 
   def pay_date_cannot_be_in_the_past
-    errors.add(:pay_date, "can't be in the past") if pay_date.present? && pay_date < Date.today
+    errors.add(:pay_date, "can't be in the past") if pay_date.present? && pay_date < Time.zone.today
   end
 end

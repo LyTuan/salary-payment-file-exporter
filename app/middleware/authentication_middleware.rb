@@ -17,7 +17,7 @@ class AuthenticationMiddleware
               [{ error: 'Authorization token is missing or invalid' }.to_json]]
     end
 
-    token = auth_header.split(' ').last
+    token = auth_header.split.last
     company = Company.find_by(api_key: token)
     if company
       env['current_company'] = company
