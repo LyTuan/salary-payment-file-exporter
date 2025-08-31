@@ -49,3 +49,14 @@ jobs:
         with:
           name: rspec-report
           path: tmp/rspec.html
+
+      - name: Security Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+
