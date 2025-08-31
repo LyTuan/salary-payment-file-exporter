@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Payment < ApplicationRecord
   belongs_to :company
   belongs_to :exported_file, optional: true
@@ -8,9 +10,9 @@ class Payment < ApplicationRecord
   # Validations
   validates :employee_id, presence: true
   validates :amount_cents, numericality: { greater_than: 0 }
-  validates :currency, inclusion: { in: %w(AUD), message: "must be 'AUD'" }
-  validates :bank_bsb, format: { with: /\A\d{6}\z/, message: "must be 6 digits" }
-  validates :bank_account, format: { with: /\A\d{6,9}\z/, message: "must be 6-9 digits" }
+  validates :currency, inclusion: { in: %w[AUD], message: "must be 'AUD'" }
+  validates :bank_bsb, format: { with: /\A\d{6}\z/, message: 'must be 6 digits' }
+  validates :bank_account, format: { with: /\A\d{6,9}\z/, message: 'must be 6-9 digits' }
   validates :pay_date, presence: true
 
   # Custom validation for pay_date

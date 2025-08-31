@@ -124,6 +124,24 @@ This project uses RSpec for testing.
     ![img.png](demo/unittest-result.png)
 ---
 
+## 💅 Linting and Code Style
+
+This project uses [RuboCop](https://rubocop.org/) with the `rubocop-rails-omakase` configuration to enforce a consistent and high-quality coding style.
+
+### Check for Offenses
+
+To scan the entire project for style violations, run the following command:
+
+```sh 
+ bundle exec rubocop
+```
+
+To apply the code following rubocop detection, run the following command:
+```sh
+bundle exec rubocop -A 
+```
+
+---
 ## ⚡️ Performance Testing
 
 To ensure the application can handle a large volume of data, especially for the daily export job, performance testing tasks are included.

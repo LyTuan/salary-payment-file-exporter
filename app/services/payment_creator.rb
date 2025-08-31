@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class PaymentCreator
   # A custom error class for this service for better error handling.
   class CreationError < StandardError; end
@@ -14,7 +16,7 @@ class PaymentCreator
   end
 
   def call
-    raise CreationError, "Payments data cannot be empty" if @payments_attributes.empty?
+    raise CreationError, 'Payments data cannot be empty' if @payments_attributes.empty?
 
     # For high-performance bulk inserts, `insert_all!` is significantly faster than
     # creating records one by one, as it performs a single SQL INSERT statement.
