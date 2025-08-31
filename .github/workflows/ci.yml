@@ -42,10 +42,10 @@ jobs:
           bundle exec rake db:migrate 
 
       - name: Run RSpec tests
-        run: bundle exec rspec --format RspecJunitFormatter --out tmp/rspec.xml --format progress
+        run: bundle exec rspec --format RspecJunitFormatter --out tmp/rspec.html --format progress
 
       - name: Upload test report
         uses: actions/upload-artifact@v4
         with:
           name: rspec-report
-          path: tmp/rspec.xml
+          path: tmp/rspec.html
