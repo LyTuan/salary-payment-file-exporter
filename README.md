@@ -1,5 +1,7 @@
 # Salary Payment File Exporter
 
+[![Ruby on Rails CI](https://github.com/LyTuan/salary-payment-file-exporter/actions/workflows/ci.yml/badge.svg)](https://github.com/LyTuan/salary-payment-file-exporter/actions)
+
 This is a Ruby on Rails API application designed to accept salary payment information, store it, and export it daily as a formatted text file.
 
 ---
