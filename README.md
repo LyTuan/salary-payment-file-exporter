@@ -214,7 +214,7 @@ sequenceDiagram
         Database-->>CreateContract: Returns true/false
         
         alt Payload Invalid
-            CreateContract-->>-PaymentsController: Returns validation failure
+            CreateContract-->>PaymentsController: Returns validation failure
             PaymentsController-->>Client: 400 Bad Request with errors
         else Payload Valid
             CreateContract-->>PaymentsController: Returns validated data
