@@ -121,7 +121,7 @@ This project uses RSpec for testing.
     ```
 3. **Result**
 
-![img.png](demo/unit_test_result.png)
+    ![img.png](demo/unittest-result.png)
 ---
 
 ## ⚡️ Performance Testing
@@ -187,29 +187,50 @@ Visual diagrams of the application's main processes, created with Mermaid.
 
 ### API Payment Creation Flow
 
-This diagram illustrates the sequence of events when a client submits new payments to the `POST /payments` endpoint. It highlights the high-performance bulk-insert strategy which bypasses model validations in favor of speed, relying on database-level constraints for integrity.
+This diagram illustrates the sequence of events when a client submits new payments to the `POST /payments` endpoint. It shows the authentication, validation, and creation process.
 
 ```mermaid
 sequenceDiagram
     participant Client
+    participant AuthMiddleware as "Authentication Middleware"
     participant PaymentsController
+    participant CreateContract as "Payments::CreateContract"
     participant PaymentCreator
     participant Database
 
-    Client->>PaymentsController: POST /payments with JSON payload
-    PaymentsController->>PaymentCreator: call(company:, payments_attributes:)
-    Note over PaymentCreator: Bypasses all model validations for performance
-    PaymentCreator->>Database: INSERT INTO payments (...) [single bulk statement]
+    Client->>+AuthMiddleware: POST /payments with Bearer Token & JSON
+    AuthMiddleware->>Database: Find company by api_key
     
-    alt Database constraints met
-        Database-->>PaymentCreator: Success
-        PaymentCreator-->>PaymentsController: Returns array of attribute hashes
-        PaymentsController-->>Client: 201 Created with success message
-    else Database constraint violated (e.g., NOT NULL)
-        Database-->>PaymentCreator: Raises DB-level exception (e.g., ActiveRecord::NotNullViolation)
-        PaymentCreator-->>PaymentsController: Propagates DB exception
-        Note over PaymentsController: Catches exception via 'rescue StandardError'
-        PaymentsController-->>Client: 400 Bad Request with error message
+    alt Invalid Token
+        Database-->>AuthMiddleware: Company not found
+        AuthMiddleware-->>-Client: 401 Unauthorized
+    else Valid Token
+        Database-->>AuthMiddleware: Returns company
+        Note right of AuthMiddleware: Adds company to request env
+        AuthMiddleware->>+PaymentsController: Forwards request
+        
+        PaymentsController->>+CreateContract: call(payload)
+        CreateContract->>Database: Check if company_id exists
+        Database-->>CreateContract: Returns true/false
+        
+        alt Payload Invalid
+            CreateContract-->>-PaymentsController: Returns validation failure
+            PaymentsController-->>-Client: 400 Bad Request with errors
+        else Payload Valid
+            CreateContract-->>-PaymentsController: Returns validated data
+            
+            Note over PaymentsController: Security Check: payload company_id == authenticated company_id?
+            
+            alt Mismatched Company ID
+                PaymentsController-->>-Client: 403 Forbidden
+            else Matched Company ID
+                PaymentsController->>+PaymentCreator: call(company:, payments_attributes:)
+                PaymentCreator->>Database: INSERT INTO payments (...) [bulk insert]
+                Database-->>PaymentCreator: Success
+                PaymentCreator-->>-PaymentsController: Returns created records
+                PaymentsController-->>-Client: 201 Created
+            end
+        end
     end
 
 ```
