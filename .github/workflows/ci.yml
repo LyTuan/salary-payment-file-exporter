@@ -8,6 +8,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      RAILS_ENV: test
     services:
       postgres:
         image: postgres:14-alpine
@@ -35,13 +37,9 @@ jobs:
           bundler-cache: true # This will run `bundle install` and cache gems
 
       - name: Set up Test Database
-        env:
-          RAILS_ENV: test
         run: |
-          bin/rails db:create
-          bin/rails db:schema:load
+          bundle exec rails db:create
+          bundle exec rails db:schema:load
 
       - name: Run RSpec tests
-        env:
-          RAILS_ENV: test
         run: bundle exec rspec
