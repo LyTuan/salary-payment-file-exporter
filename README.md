@@ -326,6 +326,15 @@ To manually trigger the daily payment export job, run the following Rake task. T
 rails exporter:run
 ```
 
+To automatic trigger using cronjob at 17:00 every day run the following command:
+```sh
+crontab - e 
+```
+Then add bellow command to file and change /path/to/folder to relative path of your project:
+```sh 
+00 17 * * * /bin/bash -l -c 'cd path/to/folder && rbenv exec bundle exec rails exporter:run >> log/cron.log 2>&1'
+```
+
 ### ![](https://img.shields.io/badge/Run%20in%20Postman-orange?logo=postman) Testing with Postman 
 A Postman collection is included in this repository to make it easy to test the API endpoints and validation rules.
 
