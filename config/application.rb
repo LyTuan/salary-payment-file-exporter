@@ -14,9 +14,9 @@ require 'action_controller/railtie'
 # require "action_text/engine"
 # require "action_view/railtie"
 # require "action_cable/engine"
-require 'dry-validation'
-require_relative '../app/middleware/authentication_middleware'
-require_relative '../app/contracts/payments/create_contract'
+# require 'dry-validation'
+# require_relative '../app/middleware/authentication_middleware'
+# require_relative '../app/contracts/payments/create_contract'
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
@@ -29,6 +29,9 @@ module SalaryPaymentFileExporter
     # Add custom middleware and contracts to the autoload paths
     config.autoload_paths << Rails.root.join('app/middleware')
     config.autoload_paths << Rails.root.join('app/contracts')
+    # config.eager_load_paths << Rails.root.join("app/middleware")
+    # config.eager_load_paths << Rails.root.join("app/contracts")
+    require Rails.root.join("app/middleware/authentication_middleware")
     config.middleware.use AuthenticationMiddleware
 
     config.load_defaults 8.0
