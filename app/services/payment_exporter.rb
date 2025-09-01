@@ -2,9 +2,10 @@
 
 require 'csv'
 require 'fileutils'
+require 'ostruct'
 
 # This should be in app/services/
-class PaymentExporter
+class PaymentExporter < ApplicationService
   EXPORT_PATH = Rails.root.join(
     ENV.fetch('EXPORT_PATH', Rails.application.credentials[:export_path].presence || 'exports')
   )
@@ -13,11 +14,17 @@ class PaymentExporter
     ENV.fetch('OUTBOX_PATH', Rails.application.credentials[:outbox_path].presence || 'outbox')
   )
 
-  def export!
+  def call
     # Find payments that are pending and due today or earlier
     payments_to_export = Payment.pending.where(pay_date: ..Time.zone.today)
 
-    return Rails.logger.debug 'No pending payments to export.' if payments_to_export.none?
+    if payments_to_export.none?
+      Rails.logger.debug 'No pending payments to export.'
+      return OpenStruct.new(success?: true, count: 0, filepath: nil)
+    end
+
+    # Capture the count before the records are updated.
+    export_count = payments_to_export.count
 
     # Ensure the export directory exists
     FileUtils.mkdir_p(EXPORT_PATH)
@@ -46,7 +53,12 @@ class PaymentExporter
 
     # Move file after the transaction is successfully committed
     simulate_sftp_upload(filepath)
-    Rails.logger.debug { "Successfully exported #{payments_to_export.count} payments and moved to outbox." }
+    OpenStruct.new(success?: true, count: export_count, filepath: filepath)
+  rescue StandardError => e
+    # Log the full error for debugging
+    Rails.logger.error("Payment export failed: #{e.message}")
+    Rails.logger.error(e.backtrace.join("\n"))
+    OpenStruct.new(success?: false, error: "An unexpected error occurred during export: #{e.message}")
   end
 
   private

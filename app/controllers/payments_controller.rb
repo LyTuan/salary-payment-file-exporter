@@ -20,15 +20,15 @@ class PaymentsController < ApplicationController
     end
 
     # If validation passes, proceed with the service object
-    created_records = PaymentCreator.call(
+    result = PaymentCreator.call(
       company: authenticated_company,
       payments_attributes: validated_data[:payments]
     )
 
-    render json: { message: 'Payments created successfully.', count: created_records.size }, status: :created
-
-  # Rescue from service-level or unexpected errors.
-  rescue PaymentCreator::CreationError => e
-    render json: { error: e.message }, status: :bad_request
+    if result.success?
+      render json: { message: 'Payments created successfully.', count: result.created_records.size }, status: :created
+    else
+      render json: { error: result.error }, status: :unprocessable_entity
+    end
   end
 end

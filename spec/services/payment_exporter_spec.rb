@@ -26,7 +26,7 @@ RSpec.describe PaymentExporter do
     FileUtils.rm_rf(outbox_path)
   end
 
-  describe '#export!' do
+  describe '.call' do
     context 'when there are pending payments to export' do
       # Payments that should be exported
       let!(:payment_to_export1) { create(:payment, pay_date: Time.zone.today) } # Due today
@@ -41,30 +41,30 @@ RSpec.describe PaymentExporter do
       let!(:exported_payment) { create(:payment, status: :exported) }
 
       it 'creates one new ExportedFile record' do
-        expect { described_class.new.export! }.to change(ExportedFile, :count).by(1)
+        expect { described_class.call }.to change(ExportedFile, :count).by(1)
       end
 
       it 'updates the status of due payments to exported' do
-        described_class.new.export!
+        described_class.call
         expect(payment_to_export1.reload.status).to eq('exported')
         expect(payment_to_export2.reload.status).to eq('exported')
       end
 
       it 'associates the exported payments with the new file record' do
-        described_class.new.export!
+        described_class.call
         exported_file = ExportedFile.last
         expect(payment_to_export1.reload.exported_file).to eq(exported_file)
         expect(payment_to_export2.reload.exported_file).to eq(exported_file)
       end
 
       it 'does not change the status of payments that are not due or already exported' do
-        described_class.new.export!
+        described_class.call
         expect(future_payment.reload.status).to eq('pending')
         expect(exported_payment.reload.status).to eq('exported')
       end
 
       it 'creates a correctly formatted file and moves it to the outbox' do
-        described_class.new.export!
+        described_class.call
 
         filename = "#{Time.zone.today.strftime('%Y%m%d')}_payments.txt"
         final_filepath = outbox_path.join(filename)
@@ -77,12 +77,20 @@ RSpec.describe PaymentExporter do
         expect(csv_content[1]).to include(payment_to_export1.employee_id)
         expect(csv_content[2]).to include(payment_to_export2.employee_id)
       end
+
+      it 'returns a successful result object' do
+        result = described_class.call
+        expect(result).to be_success
+        expect(result.count).to eq(2)
+      end
     end
 
     context 'when there are no pending payments to export' do
       it 'does not create any new records or files' do
-        expect { described_class.new.export! }.not_to change(ExportedFile, :count)
+        result = nil
+        expect { result = described_class.call }.not_to change(ExportedFile, :count)
         expect(Dir.children(outbox_path)).to be_empty
+        expect(result.count).to eq(0)
       end
     end
   end
