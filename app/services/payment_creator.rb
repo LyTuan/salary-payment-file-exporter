@@ -1,22 +1,15 @@
 # frozen_string_literal: true
 
-class PaymentCreator
-  # A custom error class for this service for better error handling.
-  class CreationError < StandardError; end
+require 'ostruct'
 
-  # The public interface for the service.
-  # It's often convenient to have a class method `call` that hides the instantiation.
-  def self.call(company:, payments_attributes:)
-    new(company: company, payments_attributes: payments_attributes).call
-  end
-
+class PaymentCreator < ApplicationService
   def initialize(company:, payments_attributes:)
     @company = company
     @payments_attributes = payments_attributes || []
   end
 
   def call
-    raise CreationError, 'Payments data cannot be empty' if @payments_attributes.empty?
+    return OpenStruct.new(success?: false, error: 'Payments data cannot be empty') if @payments_attributes.empty?
 
     # For high-performance bulk inserts, `insert_all!` is significantly faster than
     # creating records one by one, as it performs a single SQL INSERT statement.
@@ -33,7 +26,9 @@ class PaymentCreator
 
     # This will raise a database-level error (e.g., ActiveRecord::NotNullViolation) on failure.
     Payment.insert_all!(records_to_insert)
-
-    records_to_insert # Return the array of hashes so the controller can get the count.
+    OpenStruct.new(success?: true, created_records: records_to_insert)
+  rescue ActiveRecord::ActiveRecordError => e
+    # Catch potential database errors from `insert_all!` and return a failure object.
+    OpenStruct.new(success?: false, error: e.message)
   end
 end

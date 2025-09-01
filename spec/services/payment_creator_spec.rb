@@ -21,12 +21,21 @@ RSpec.describe PaymentCreator do
         expect(Payment.first.company).to eq(company)
         expect(Payment.last.company).to eq(company)
       end
+
+      it 'returns a successful result object' do
+        result = described_class.call(company: company, payments_attributes: valid_attributes)
+        expect(result).to be_success
+        expect(result.created_records.size).to eq(2)
+      end
     end
 
     context 'with empty or nil payment attributes' do
-      it 'raises a CreationError' do
-        expect { described_class.call(company: company, payments_attributes: []) }.to raise_error(PaymentCreator::CreationError)
-        expect { described_class.call(company: company, payments_attributes: nil) }.to raise_error(PaymentCreator::CreationError)
+      it 'returns a failure result object and does not create payments' do
+        expect do
+          result = described_class.call(company: company, payments_attributes: [])
+          expect(result).not_to be_success
+          expect(result.error).to eq('Payments data cannot be empty')
+        end.not_to change(Payment, :count)
       end
     end
   end
