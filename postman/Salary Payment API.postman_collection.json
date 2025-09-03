@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "f2e0b03f-0c70-4409-b92a-0c483d67a510",
+		"_postman_id": "ee67d986-3125-46eb-8dbc-4d025aff2c59",
 		"name": "Salary Payment API",
 		"description": "A collection to test the validation rules for the Salary Payment File Exporter API.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
@@ -13,6 +13,17 @@
 				{
 					"name": "[Success] Create Payments with Valid Data",
 					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.request.headers.add({ key: 'X-Client-Key', value: pm.collectionVariables.get('client_key') });",
+									"pm.request.headers.add({ key: 'Authorization', value: 'Bearer ' + pm.collectionVariables.get('secret_key') });"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
 						{
 							"listen": "test",
 							"script": {
@@ -33,11 +44,25 @@
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "noauth"
+						},
 						"method": "POST",
-						"header": [],
+						"header": [
+							{
+								"key": "HTTP_X_CLIENT_KEY",
+								"value": "{{HTTP_X_CLIENT_KEY}}",
+								"type": "text"
+							},
+							{
+								"key": "HTTP_AUTHORIZATION",
+								"value": "{{HTTP_AUTHORIZATION}}",
+								"type": "text"
+							}
+						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"company_id\": \"1\",\n    \"payments\": [\n        {\n            \"employee_id\": \"E-{{$randomInt}}\",\n            \"bank_bsb\": \"062000\",\n            \"bank_account\": \"12345678\",\n            \"amount_cents\": 250000,\n            \"currency\": \"AUD\",\n            \"pay_date\": \"{{$isoTimestamp}}\"\n        }\n    ]\n}",
+							"raw": "{\n    \"company_id\": \"{{company_id}}\",\n    \"payments\": [\n        {\n            \"employee_id\": \"E-{{$randomInt}}\",\n            \"bank_bsb\": \"062000\",\n            \"bank_account\": \"12345678\",\n            \"amount_cents\": 50000,\n            \"currency\": \"AUD\",\n            \"pay_date\": \"{{$isoTimestamp}}\"\n        }\n    ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -80,14 +105,35 @@
 								"type": "text/javascript",
 								"packages": {}
 							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"packages": {},
+								"type": "text/javascript"
+							}
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "noauth"
+						},
 						"method": "POST",
-						"header": [],
+						"header": [
+							{
+								"key": "X-Client-Key",
+								"value": "{{client_key}}",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{secret_key}}",
+								"type": "text"
+							}
+						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n   \"company_id\":\"abc\",\n    \"payments\": [\n        {\n            \"employee_id\": \"E-{{$randomInt}}\",\n            \"bank_bsb\": \"062000\",\n            \"bank_account\": \"12345678\",\n            \"amount_cents\": 0,\n            \"currency\": \"AUD\",\n            \"pay_date\": \"{{$isoTimestamp}}\"\n        }\n    ]\n\n}",
+							"raw": "{\n    \"company_id\": \"{{company_id}}\",\n    \"payments\": [\n        {\n            \"employee_id\": \"E-{{$randomInt}}\",\n            \"bank_bsb\": \"062000\",\n            \"bank_account\": \"12345678\",\n            \"amount_cents\": 0,\n            \"currency\": \"AUD\",\n            \"pay_date\": \"{{$isoTimestamp}}\"\n        }\n    ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -129,10 +175,21 @@
 					],
 					"request": {
 						"method": "POST",
-						"header": [],
+						"header": [
+							{
+								"key": "X-Client-Key",
+								"value": "{{client_key}}",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{secret_key}}",
+								"type": "text"
+							}
+						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"company_id\":\"abc\",\n    \"payments\": [\n        {\n            \"employee_id\": \"E-{{$randomInt}}\",\n            \"bank_bsb\": \"06200\",\n            \"bank_account\": \"12345678\",\n            \"amount_cents\": 50000,\n            \"currency\": \"AUD\",\n            \"pay_date\": \"{{$isoTimestamp}}\"\n        }\n    ]\n}",
+							"raw": "{\n    \"company_id\": \"{{company_id}}\",\n    \"payments\": [\n        {\n            \"employee_id\": \"E-{{$randomInt}}\",\n            \"bank_bsb\": \"06200\",\n            \"bank_account\": \"12345678\",\n            \"amount_cents\": 50000,\n            \"currency\": \"AUD\",\n            \"pay_date\": \"{{$isoTimestamp}}\"\n        }\n    ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -174,10 +231,21 @@
 					],
 					"request": {
 						"method": "POST",
-						"header": [],
+						"header": [
+							{
+								"key": "X-Client-Key",
+								"value": "{{client_key}}",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{secret_key}}",
+								"type": "text"
+							}
+						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"company_id\": \"abc\",\n    \"payments\": [\n        {\n            \"employee_id\": \"E-{{$randomInt}}\",\n            \"bank_bsb\": \"062000\",\n            \"bank_account\": \"1234567890\",\n            \"amount_cents\": 50000,\n            \"currency\": \"AUD\",\n            \"pay_date\": \"{{$isoTimestamp}}\"\n        }\n    ]\n}",
+							"raw": "{\n    \"company_id\": \"{{company_id}}\",\n    \"payments\": [\n        {\n            \"employee_id\": \"E-{{$randomInt}}\",\n            \"bank_bsb\": \"062000\",\n            \"bank_account\": \"1234567890\",\n            \"amount_cents\": 50000,\n            \"currency\": \"AUD\",\n            \"pay_date\": \"{{$isoTimestamp}}\"\n        }\n    ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -219,10 +287,21 @@
 					],
 					"request": {
 						"method": "POST",
-						"header": [],
+						"header": [
+							{
+								"key": "X-Client-Key",
+								"value": "{{client_key}}",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{secret_key}}",
+								"type": "text"
+							}
+						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"payments\": [\n        {\n            \"employee_id\": \"E-{{$randomInt}}\",\n            \"bank_bsb\": \"062000\",\n            \"bank_account\": \"12345678\",\n            \"amount_cents\": 50000,\n            \"currency\": \"USD\",\n            \"pay_date\": \"{{$isoTimestamp}}\"\n        }\n    ]\n}",
+							"raw": "{\n    \"company_id\": \"{{company_id}}\",\n    \"payments\": [\n        {\n            \"employee_id\": \"E-{{$randomInt}}\",\n            \"bank_bsb\": \"062000\",\n            \"bank_account\": \"12345678\",\n            \"amount_cents\": 50000,\n            \"currency\": \"USD\",\n            \"pay_date\": \"{{$isoTimestamp}}\"\n        }\n    ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -281,10 +360,21 @@
 					],
 					"request": {
 						"method": "POST",
-						"header": [],
+						"header": [
+							{
+								"key": "X-Client-Key",
+								"value": "{{client_key}}",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{secret_key}}",
+								"type": "text"
+							}
+						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"payments\": [\n        {\n            \"employee_id\": \"E-{{$randomInt}}\",\n            \"bank_bsb\": \"062000\",\n            \"bank_account\": \"12345678\",\n            \"amount_cents\": 50000,\n            \"currency\": \"AUD\",\n            \"pay_date\": \"{{yesterday_date}}\"\n        }\n    ]\n}",
+							"raw": "{\n    \"company_id\": \"{{company_id}}\",\n    \"payments\": [\n        {\n            \"employee_id\": \"E-{{$randomInt}}\",\n            \"bank_bsb\": \"062000\",\n            \"bank_account\": \"12345678\",\n            \"amount_cents\": 50000,\n            \"currency\": \"AUD\",\n            \"pay_date\": \"{{yesterday_date}}\"\n        }\n    ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -316,7 +406,7 @@
 									"",
 									"pm.test(\"Response contains correct error message\", function () {",
 									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.error).to.eql(\"Authorization token is missing or invalid\");",
+									"    pm.expect(jsonData.error).to.eql(\"Invalid Client-Key or Secret-Key\");",
 									"});"
 								],
 								"type": "text/javascript",
@@ -325,14 +415,22 @@
 						}
 					],
 					"request": {
-						"auth": {
-							"type": "noauth"
-						},
 						"method": "POST",
-						"header": [],
+						"header": [
+							{
+								"key": "X-Client-Key",
+								"value": "{{client_key}}",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer abc",
+								"type": "text"
+							}
+						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"payments\": []\n}",
+							"raw": "{\n    \"company_id\": \"{{company_id}}\",\n    \"payments\": []\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -354,24 +452,58 @@
 			]
 		}
 	],
-	"auth": {
-		"type": "bearer",
-		"bearer": [
-			{
-				"key": "token",
-				"value": "HELLO123",
-				"type": "string"
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
 			}
-		]
-	},
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
 	"variable": [
 		{
 			"key": "baseUrl",
 			"value": "http://localhost:3000"
 		},
 		{
+			"key": "client_key",
+			"value": ""
+		},
+		{
+			"key": "secret_key",
+			"value": ""
+		},
+		{
+			"key": "company_id",
+			"value": "1"
+		},
+		{
 			"key": "yesterday_date",
 			"value": ""
+		},
+		{
+			"key": "HTTP_X_CLIENT_KEY",
+			"value": "2URf135pEU8Gohhu5fGwFW5B",
+			"disabled": true
+		},
+		{
+			"key": "HTTP_AUTHORIZATION",
+			"value": "Bearer 6oZT6qRaPiJ4rNYiSVhiHpK5",
+			"disabled": true
 		}
 	]
 }

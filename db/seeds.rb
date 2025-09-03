@@ -10,8 +10,18 @@
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
 
-company = Company.find_or_create_by!(name: 'Default Company')
+# Find or initialize the company to avoid creating duplicates.
+company = Company.find_or_initialize_by(name: 'Default Company')
 
-Rails.logger.debug 'Seed data created.'
-Rails.logger.debug { "Default Company API Key: #{company.api_key}" }
-Rails.logger.debug "Use this key in the 'Authorization: Bearer <key>' header for API requests."
+# Ensure keys are generated if they don't exist on an old record.
+# The `has_secure_token` callbacks only run on create, so we handle existing records manually.
+company.regenerate_client_key if company.client_key.blank?
+company.regenerate_secret_key if company.secret_key.blank?
+
+# Save the company if it's a new record or if keys were just generated.
+company.save! if company.new_record? || company.changed?
+
+puts 'Seed data created.'
+puts "  Client-Key (for X-Client-Key header): #{company.client_key}"
+puts "  Secret-Key (for Authorization: Bearer header): #{company.secret_key}"
+puts 'Use these keys in your API client.'

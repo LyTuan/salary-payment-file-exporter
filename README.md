@@ -89,6 +89,11 @@ With the database container running, create, migrate, and seed your development 
 # Create the databases
 rails db:create
 
+# Generate encryption keys (if they don't exist)
+# This is required for encrypting sensitive data like the company's secret_key.
+# This command is safe to run multiple times.
+rails db:encryption:init
+
 # Run migrations
 rails db:migrate
 
@@ -228,15 +233,15 @@ sequenceDiagram
     participant PaymentCreator
     participant Database
 
-    Client->>AuthMiddleware: POST /payments with Bearer Token & JSON
-    AuthMiddleware->>Database: Find company by api_key
+    Client->>AuthMiddleware: POST /payments with X-Client-Key & Bearer Token
+    AuthMiddleware->>Database: Find company by client_key
     
     alt Invalid Token
         Database-->>AuthMiddleware: Company not found
         AuthMiddleware-->>Client: 401 Unauthorized
     else Valid Token
         Database-->>AuthMiddleware: Returns company
-        Note right of AuthMiddleware: Adds company to request env
+        Note right of AuthMiddleware: Securely compares secret_key, then adds company to request env
         AuthMiddleware->>PaymentsController: Forwards request
         
         PaymentsController->>CreateContract: call(payload)
@@ -321,30 +326,22 @@ You can submit a batch of payments to the `POST /payments` endpoint.
 **Example `curl` Request:**
 
 ```sh
-curl -X POST http://localhost:3000/payments \
--H "Content-Type: application/json" \
+curl -X POST http://localhost:3000/payments \\
+-H "Content-Type: application/json" \\
+-H "X-Client-Key: YOUR_CLIENT_KEY_HERE" \\
+-H "Authorization: Bearer YOUR_SECRET_KEY_HERE" \\
 -d '{
-  "payment": {
-    "company_id": 1,
-    "payments": [
-      {
-        "employee_id": "E123",
-        "bank_bsb": "062000",
-        "bank_account": "12345678",
-        "amount_cents": 500000,
-        "currency": "AUD",
-        "pay_date": "2024-10-28"
-      },
-      {
-        "employee_id": "E456",
-        "bank_bsb": "082000",
-        "bank_account": "87654321",
-        "amount_cents": 650000,
-        "currency": "AUD",
-        "pay_date": "2024-10-28"
-      }
-    ]
-  }
+  "company_id": "1",
+  "payments": [
+    {
+      "employee_id": "E123",
+      "bank_bsb": "062000",
+      "bank_account": "12345678",
+      "amount_cents": 500000,
+      "currency": "AUD",
+      "pay_date": "2025-10-28"
+    }
+  ]
 }'
 ```
 ---
