@@ -44,6 +44,7 @@ jobs:
         run: |
           bundle exec rake db:create
           bundle exec rake db:migrate 
+          bundle exec rake db:schema:load
 
       - name: Run RSpec tests
         run: bundle exec rspec --format RspecJunitFormatter --out tmp/rspec.html --format progress
