@@ -11,19 +11,25 @@ class AuthenticationMiddleware
     # Only apply this middleware to paths that require authentication
     return @app.call(env) unless request.path.start_with?('/payments')
 
+    client_key = request.get_header('HTTP_X_CLIENT_KEY')
     auth_header = request.get_header('HTTP_AUTHORIZATION')
-    unless auth_header&.start_with?('Bearer ')
-      return [401, { 'Content-Type' => 'application/json' },
-              [{ error: 'Authorization token is missing or invalid' }.to_json]]
+    puts 'client_key '
+    puts client_key
+    puts  'auth_header '
+    puts auth_header
+    unless client_key && auth_header&.start_with?('Bearer ')
+      return [401, { 'Content-Type' => 'application/json' }, [{ error: 'X-Client-Key and Authorization headers are required' }.to_json]]
     end
 
-    token = auth_header.split.last
-    company = Company.find_by(api_key: token)
-    if company
+    secret_key = auth_header.split.last
+    company = Company.find_by(client_key: client_key)
+
+    # Use secure_compare to prevent timing attacks
+    if company && ActiveSupport::SecurityUtils.secure_compare(company.secret_key, secret_key)
       env['current_company'] = company
       @app.call(env)
     else
-      [401, { 'Content-Type' => 'application/json' }, [{ error: 'Invalid API Key' }.to_json]]
+      [401, { 'Content-Type' => 'application/json' }, [{ error: 'Invalid Client-Key or Secret-Key' }.to_json]]
     end
   end
 end

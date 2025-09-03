@@ -6,8 +6,15 @@ require 'rails_helper'
 RSpec.describe 'Payments API', type: :request do
   # Use let! to ensure the company and its API key are created before tests run.
   let!(:company) { create(:company) }
-  let(:api_key) { company.api_key }
-  let(:headers) { { 'Authorization' => "Bearer #{api_key}", 'Content-Type' => 'application/json' } }
+  let(:client_key) { company.client_key }
+  let(:secret_key) { company.secret_key }
+  let(:headers) do
+    {
+      'Authorization' => "Bearer #{secret_key}",
+      'X-Client-Key' => client_key,
+      'Content-Type' => 'application/json'
+    }
+  end
 
   describe 'POST /payments' do
     # Use `attributes_for` to get a hash of valid attributes from the factory.
@@ -76,12 +83,17 @@ RSpec.describe 'Payments API', type: :request do
 
     context 'with invalid authentication' do
       it 'returns a 401 when token is missing' do
-        post '/payments', params: valid_payload.to_json, headers: { 'Content-Type' => 'application/json' }
+        post '/payments', params: valid_payload.to_json, headers: { 'Content-Type' => 'application/json', 'X-Client-Key' => client_key }
+        expect(response).to have_http_status(:unauthorized)
+      end
+
+      it 'returns a 401 when client key is missing' do
+        post '/payments', params: valid_payload.to_json, headers: { 'Content-Type' => 'application/json', 'Authorization' => "Bearer #{secret_key}" }
         expect(response).to have_http_status(:unauthorized)
       end
 
       it 'returns a 401 when token is invalid' do
-        invalid_headers = { 'Authorization' => 'Bearer invalid-token', 'Content-Type' => 'application/json' }
+        invalid_headers = headers.merge('Authorization' => 'Bearer invalid-secret')
         post '/payments', params: valid_payload.to_json, headers: invalid_headers
         expect(response).to have_http_status(:unauthorized)
       end
