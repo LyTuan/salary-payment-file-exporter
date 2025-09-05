@@ -13,10 +13,6 @@ class AuthenticationMiddleware
 
     client_key = request.get_header('HTTP_X_CLIENT_KEY')
     auth_header = request.get_header('HTTP_AUTHORIZATION')
-    puts 'client_key '
-    puts client_key
-    puts  'auth_header '
-    puts auth_header
     unless client_key && auth_header&.start_with?('Bearer ')
       return [401, { 'Content-Type' => 'application/json' }, [{ error: 'X-Client-Key and Authorization headers are required' }.to_json]]
     end
